@@ -1,0 +1,138 @@
+/*--------------------------|	Botão	|------------------------------------------ */
+.editar {
+	width: 30px !important;
+	height: 20px !important;
+}
+
+/* .ui-menu.ui-widget a{
+	white-space: normal !important;
+}*/
+
+
+.carregando {
+	height: 100px;
+	width: 100px;
+	border: 1px solid #9BABCF; /* margin:30px auto;*/
+	background: url(#{request.contextPath}/resources/imagens/carregando.gif)
+		no-repeat -25px -30px;
+	position: fixed;
+	top: 50%;
+	left: 46%;
+	z-index: 2100;
+	display: none;
+}
+
+#rodape-caixa {
+    height: 55px;
+    margin: 0 auto;
+    width: 944px;
+}
+
+#wrapRodape {
+	background: #0039ba;
+	height: 68px;
+	width: 100%;
+	position: absolute;
+	bottom: 0;
+	margin: 0 auto;
+}
+
+.carregando span {
+	position: absolute;
+	top: 70px;
+	left: 17px;
+	font-weight: bold;
+}
+
+.btn-primary.active,.btn-warning.active,.btn-danger.active,.btn-success.active,.btn-info.active,.btn-inverse.active
+	{
+	color: rgba(255, 255, 255, 0.75) !important;
+}
+
+.btn {
+	border-color: #c5c5c5 !important;
+	border-color: rgba(0, 0, 0, 0.15) rgba(0, 0, 0, 0.15)
+		rgba(0, 0, 0, 0.25) !important
+}
+
+.btn-primary {
+	color: #fff !important;
+	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25) !important;
+	background-color: #006dcc !important;
+	*background-color: #04c !important;
+	background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#08c),
+		to(#04c)) !important;
+	background-image: -webkit-linear-gradient(top, #08c, #04c);
+	background-image: -o-linear-gradient(top, #08c, #04c);
+	background-image: linear-gradient(to bottom, #08c, #04c);
+	background-image: -moz-linear-gradient(top, #08c, #04c);
+	background-repeat: repeat-x !important;
+	border-color: #04c #04c #002a80 !important;
+	border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25)
+		!important;
+	filter: progid:dximagetransform.microsoft.gradient(startColorstr='#ff0088cc',
+		endColorstr='#ff0044cc', GradientType=0) !important;
+	filter: progid:dximagetransform.microsoft.gradient(enabled=false)
+		!important
+}
+
+.btn-primary:hover,.btn-primary:active,.btn-primary.active,.btn-primary.disabled,.btn-primary[disabled]
+	{
+	color: #fff !important;
+	background-color: #04c !important;
+	*background-color: #003bb3 !important
+}
+
+.btn-primary:active,.btn-primary.active {
+	background-color: #039 \9  !important
+}
+
+
+.imprimir {
+	width: 30px !important;
+	height: 20px !important;
+	position: absolute !important;
+	margin-left: 32px !important;
+}
+
+.excluir {
+	width: 30px !important;
+	height: 20px !important;
+	position: absolute !important;
+}
+
+.excluirSemImprimir {
+	width: 30px !important;
+	height: 20px !important;
+	position: absolute !important;
+	margin-left: 47px !important;
+}
+
+.sinaisVitais_InfoDataGrid {
+	height: 100%;
+	margin-top: 10px;
+}
+
+.sinaisVitais_InfoColumn {
+	width: 200px;
+}
+
+.sinaisVitais_InfoCell {
+	height: 50px;
+}
+
+.sinaisVitais_ItemAfericaoColumn {
+	vertical-align: middle;
+	text-align: center;
+}
+
+.sinaisVitais_ItemAfericaoOpcoes {
+	width: 150px;
+	vertical-align: middle;
+	text-align: center;
+}
+
+.sinaisVitais_dataScroller {
+	vertical-align: middle;
+	height: 100%;
+}

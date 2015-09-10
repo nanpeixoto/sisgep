@@ -1,0 +1,498 @@
+<ui:composition template="/WEB-INF/templates/template.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core">
+
+	<ui:define name="html-head">
+		<h:outputScript library="js" name="jquery.price_format.1.3.js" />
+	</ui:define>
+
+	<ui:define name="content-main-page">
+
+		<h:form id="formConsulta">
+			<p:focus id="focusConsulta" for="formConsulta" />
+			<p:messages id="messages" showDetail="false" />
+			<h3 class="titlePage">#{bundle['pleito.consulta.cadastro']}</h3>
+
+			<!-- BOTÔES -->
+			<h:panelGroup>
+
+				<p:commandLink title="#{bundle['pleito.novo.hint']}"
+					styleClass="btnLaranja marginTop buttonSelected"
+					actionListener="#{pleitoController.novo()}"
+					onclick=" jQuery('#modalCadastroId .ui-dialog-title').text('#{bundle['pleito.label.novo']}');"
+					oncomplete="PF('modalCadastro').show();"
+					update=":cadastrarForm :#{p:component('messages')}"
+					id="btnCadastro">
+					<span>#{bundle['pleito.label.novo']}</span>
+				</p:commandLink>
+
+				<p:commandLink styleClass="btnAzul marginTop buttonSelected"
+					onclick="PrimeFaces.monitorDownload(showStatus, hideStatus)"
+					title="#{bundle['geral.button.export.hint']}" ajax="false"
+					disabled="#{pleitoController.listaFiltro.size()==0}"
+					id="btnExportar">
+					<span>#{bundle['geral.button.exportar']}</span>
+					<p:dataExporter type="xls" target="dataTableCrud"
+						fileName="#{bundle['pleito.label.nome.relatorio']}"
+						postProcessor="#{pleitoController.preExportar}" />
+				</p:commandLink>
+
+			</h:panelGroup>
+
+			<p:spacer height="30px" />
+
+			<!-- GRID DE CONSULTA -->
+			<p:outputPanel id="pnlListaResultados">
+
+				<p:dataTable value="#{pleitoController.lista}" var="pleito"
+					widgetVar="pleitos" id="dataTableCrud" rows="10"
+					emptyMessage="#{bundle['geral.crud.noItemFound']}" paginator="true"
+					filteredValue="#{pleitoController.listaFiltro}"
+					sortFunction="#{pleitoController.sortByString}"
+					tableStyleClass="tablefixa" sortBy="#{pleito.objeto}"
+					rowStyleClass="#{empty rowIx or rowIx mod 2 ne 0 ? 'even-row' : 'odd-row'}"
+					rowIndexVar="rowIx" styleClass="estilo-border-dotted zebr"
+					paginatorPosition="bottom"
+					paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+					currentPageReportTemplate="#{bundle['geral.crud.exibindo']} {startRecord} #{bundle['geral.crud.ate']} {endRecord}  #{bundle['geral.crud.de']} {totalRecords}  #{bundle['geral.crud.registros']} "
+					rowsPerPageTemplate="5,10,25,50">
+
+					<f:facet name="header">
+						<p:outputPanel style="text-align:right; margin-right:-10px"
+							styleClass="ui-widget-auxiliar">
+							<h:outputText value="#{bundle['geral.label.pesquisar']}"
+								escape="false" />
+							<p:inputText id="globalFilter" onkeyup="PF('pleitos').filter()"
+								style="width:150px;" maxlength="255"
+								styleClass="letras-maiusculas semClear">
+								<p:ajax event="keyup" update=":#{p:component('btnExportar')}"
+									global="false" />
+							</p:inputText>
+						</p:outputPanel>
+					</f:facet>
+
+
+					<p:column sortBy="#{pleito.id}"
+						sortFunction="#{pleitoController.sortByString}"
+						filterStyle="display:none; visibility:hidden;"
+						filterBy="#{pleito.id}" style="width:10%"
+						styleClass="gri-alfanumericos noBackGroundImage">
+						<h:outputText value="#{pleito.id}" />
+						<f:facet name="header">
+							<h:outputText value="#{bundle['pleito.label.numero']}" />
+						</f:facet>
+					</p:column>
+
+
+					<p:column sortBy="#{pleito.objeto}"
+						sortFunction="#{pleitoController.sortByString}"
+						filterStyle="display:none; visibility:hidden;"
+						filterBy="#{pleito.objeto}" style="width:25%"
+						styleClass="gri-alfanumericos noBackGroundImage">
+						<h:outputText value="#{pleito.objeto}" />
+						<f:facet name="header">
+							<h:outputText value="#{bundle['pleito.label.objeto']}" />
+						</f:facet>
+					</p:column>
+
+					<p:column sortBy="#{pleito.solicitante.nome}"
+						sortFunction="#{pleitoController.sortByString}"
+						filterStyle="display:none; visibility:hidden;"
+						filterBy="#{pleito.solicitante.nome}" style="width:35%"
+						styleClass="gri-alfanumericos noBackGroundImage">
+						<h:outputText value="#{pleito.solicitante.nome}" />
+						<f:facet name="header">
+							<h:outputText value="#{bundle['pleito.label.solicitante']}" />
+						</f:facet>
+					</p:column>
+
+					<p:column sortBy="#{pleito.descricaoStatus}"
+						sortFunction="#{pleitoController.sortByString}"
+						filterStyle="display:none; visibility:hidden;"
+						filterBy="#{pleito.descricaoStatus}" style="width:10%"
+						styleClass="gri-alfanumericos noBackGroundImage">
+						<h:outputText value="#{pleito.descricaoStatus}" />
+						<f:facet name="header">
+							<h:outputText value="#{bundle['pleito.label.status']}" />
+						</f:facet>
+					</p:column>
+
+					<!-- AÇÕES -->
+
+					<p:column headerText="#{bundle['geral.label.acoes']}"
+						styleClass="noBackGroundImage" style="width:10%"
+						exportable="false">
+
+						<p:commandLink title="#{bundle['geral.button.alterar.hint']}"
+							actionListener="#{pleitoController.edita(pleito)}"
+							styleClass="editar buttonSelected"
+							onclick="jQuery('#modalCadastroId .ui-dialog-title').text('#{bundle['pleito.consulta.tituloPagina']}');"
+							oncomplete="PF('modalCadastro').show();" update=":cadastrarForm">
+						</p:commandLink>
+
+						<p:commandLink title="#{bundle['geral.button.movimentar.hint']}"
+							actionListener="#{pleitoController.incluirMovimentacao(pleito)}"
+							styleClass="encaminhar buttonSelected"
+							onclick="jQuery('#modalMovimentacoesId .ui-dialog-title').text('#{bundle['pleito.movimentacao.tituloPagina']}');"
+							oncomplete="PF('modalMovimentacoes').show();"
+							update=":movimentacoesForm ">
+						</p:commandLink>
+
+						<p:commandLink id="btnExcluir"
+							onclick="PF('modalExcluir').show(); "
+							title="#{bundle['geral.button.excluir.hint']}"
+							style="margin-left: 30px; background-image: block !important;"
+							disabled="#{pleitoController.perfilConsulta}"
+							styleClass="excluir buttonSelected">
+							<f:setPropertyActionListener
+								target="#{pleitoController.instanceExcluir}" value="#{pleito}" />
+						</p:commandLink>
+					</p:column>
+				</p:dataTable>
+			</p:outputPanel>
+		</h:form>
+
+
+		<!-- DIALOG CADASTRAR PLEITO -->
+		<p:dialog header="Cadastro/Alteração de Pleito" id="modalCadastroId"
+			widgetVar="modalCadastro" styleClass="ui-dialog-background ui-widget"
+			modal="true" dynamic="true" closable="false" width="700px"
+			resizable="false" position="center"
+			onShow="giveFocus('cadastrarForm')">
+			<p:ajax event="close" listener="#{pleitoController.reset()}" />
+			<h:form id="cadastrarForm">
+				<p:focus id="focusCadastro" context="cadastrarForm" />
+				<p:messages id="messagesCadastro" escape="false" showDetail="false" />
+				<fieldset class="filtro">
+					<h:panelGrid columns="1" id="modalPainelCad01">
+
+						<h:outputLabel style="margin-right: 20px;"
+							value="#{bundle['pleito.label.objeto']}"
+							styleClass="label-button">
+							<h:outputText value="" styleClass="pesquisaDireta" />
+						</h:outputLabel>
+
+						<h:inputText value="#{pleitoController.instance.objeto}"
+							maxlength="500" size="99" id="textNome" required="true"
+							requiredMessage="#{pleitoController.getRequiredMessage('pleito.label.objeto')}"
+							styleClass="letras-maiusculas" />
+
+
+						<h:outputLabel style="margin-right: 20px;"
+							value="#{bundle['pleito.label.solicitante']}"
+							styleClass="label-button">
+							<h:outputText value="" styleClass="pesquisaDireta" />
+						</h:outputLabel>
+
+						<h:selectOneMenu value="#{pleitoController.instance.solicitante}"
+							id="cmbSolicitante" style="width: 628px;"
+							converter="omnifaces.SelectItemsConverter" required="true"
+							requiredMessage="#{pleitoController.getRequiredMessage('pleito.label.solicitante')}">
+							<f:selectItem itemLabel="Selecione" itemValue=""
+								noSelectionOption="true" />
+							<f:selectItems value="#{pleitoController.listaSolicitantes}"
+								var="sol" itemLabel="#{sol.nome}" itemValue="#{sol}" />
+						</h:selectOneMenu>
+
+
+
+						<h:outputLabel style="margin-right: 20px;"
+							value="#{bundle['pleito.label.descricao']}"
+							styleClass="label-button" />
+						<h:inputTextarea id="idDescricaoPleito" styleClass="inputtext"
+							rows="3" cols="102" onchange="limitarTextArea(this,500)"
+							onmouseout="limitarTextArea(this,500)"
+							onkeyup="limitarTextArea(this,500)"
+							value="#{pleitoController.instance.descricao}" />
+
+					</h:panelGrid>
+
+					<!-- GRAVAR CANCELAR -->
+					<h:panelGroup>
+
+						<p:commandLink title="#{bundle['geral.button.gravar.hint']}"
+							actionListener="#{pleitoController.salvar}"
+							styleClass="btnLaranja marginTop buttonSelected"
+							update=":#{p:component('btnExportar')} :#{p:component('messagesCadastro')} 
+							:#{p:component('focusCadastro')} :#{p:component('btnExportar')}   :#{p:component('pnlListaResultados')}"
+							id="btnGravar" validateClient="true">
+							<span>#{bundle['geral.button.gravar']}</span>
+						</p:commandLink>
+
+
+						<p:commandLink title="#{bundle['geral.button.cancelar.hint']}"
+							styleClass="btnAzul marginTop buttonSelected"
+							onclick="PF('modalCadastro').hide();" process="@this"
+							update=":#{p:component('messages')}">
+							<p:resetInput target="@form" />
+							<span>#{bundle['geral.button.cancelar']}</span>
+						</p:commandLink>
+					</h:panelGroup>
+				</fieldset>
+			</h:form>
+		</p:dialog>
+
+
+
+
+		<!-- DIALOG MOVIMENTAR PLEITO -->
+		<p:dialog header="Movimentacao de Pleito" id="modalMovimentacoesId"
+			widgetVar="modalMovimentacoes"
+			styleClass="ui-dialog-background ui-widget" modal="true"
+			dynamic="true" closable="true" width="1000px" resizable="false"
+			position="center" onShow="giveFocus('movimentacoesForm')">
+			<p:ajax event="close"
+				listener="#{pleitoController.resetMovimentacoes()}"
+				update=":#{p:component('formConsulta')} " />
+			<h:form id="movimentacoesForm" enctype="multipart/form-data">
+				<p:focus id="focusMovimentacoes" context="movimentacoesForm" />
+				<p:messages id="messagesMovimentacoes" escape="false"
+					showDetail="false" />
+				<fieldset class="filtro">
+					<h:panelGrid columns="2" id="modalPainelCad02">
+
+						<h:outputLabel style="margin-right: 20px;"
+							value="#{bundle['pleito.label.objeto']}"
+							styleClass="label-button">
+							<h:outputText value="" styleClass="pesquisaDireta" />
+						</h:outputLabel>
+
+						<h:inputText value="#{pleitoController.instance.objeto}"
+							maxlength="500" size="104" id="textNome" required="true"
+							requiredMessage="#{pleitoController.getRequiredMessage('pleito.label.objeto')}"
+							styleClass="letras-maiusculas select-disabled" disabled="true" />
+
+						<h:outputLabel style="margin-right: 20px;"
+							value="#{bundle['pleito.label.solicitante']}"
+							styleClass="label-button">
+							<h:outputText value="" styleClass="pesquisaDireta" />
+						</h:outputLabel>
+
+						<h:selectOneMenu value="#{pleitoController.instance.solicitante}"
+							id="cmbSolicitante" style="width: 657px; "
+							styleClass="select-disabled"
+							converter="omnifaces.SelectItemsConverter" required="true"
+							requiredMessage="#{pleitoController.getRequiredMessage('pleito.label.solicitante')}"
+							disabled="true">
+							<f:selectItem itemLabel="Selecione" itemValue=""
+								noSelectionOption="true" />
+							<f:selectItems value="#{pleitoController.listaSolicitantes}"
+								var="sol" itemLabel="#{sol.nome}" itemValue="#{sol}" />
+						</h:selectOneMenu>
+
+						<h:outputLabel style="margin-right: 20px;"
+							value="#{bundle['tipoStatus.label.status']}"
+							styleClass="label-button">
+							<h:outputText value="" styleClass="pesquisaDireta" />
+						</h:outputLabel>
+
+						<h:selectOneMenu
+							value="#{pleitoController.pleitoMovimentacao.tipoStatus}"
+							id="cmbTipoStatus" style="width: 372px;"
+							converter="omnifaces.SelectItemsConverter" required="true"
+							requiredMessage="#{pleitoController.getRequiredMessage('tipoStatus.label.status')}">
+							<f:selectItem itemLabel="Selecione" itemValue=""
+								noSelectionOption="true" />
+							<f:selectItems value="#{pleitoController.listaTipoStatus}"
+								var="tipoStatus" itemLabel="#{tipoStatus.descricao}"
+								itemValue="#{tipoStatus}" />
+							<p:ajax event="change" update="unidadeObrigatorio"
+								process="@this" />
+						</h:selectOneMenu>
+
+						<h:outputLabel style="margin-right: 20px;"
+							value="#{bundle['unidadeNegocio.label.descricao']}"
+							styleClass="label-button">
+							<h:outputText value="" styleClass="pesquisaDireta"
+								id="unidadeObrigatorio"
+								rendered="#{pleitoController.unidadeNegocioObrigatorio}" />
+						</h:outputLabel>
+
+						<h:selectOneMenu
+							value="#{pleitoController.pleitoMovimentacao.unidadeNegocio}"
+							id="cmbUnidadeNegocio" style="width: 372px;"
+							converter="omnifaces.SelectItemsConverter"
+							required="#{pleitoController.unidadeNegocioObrigatorio}"
+							requiredMessage="#{pleitoController.getRequiredMessage('unidadeNegocio.label.descricao')}">
+							<f:selectItem itemLabel="Selecione" itemValue=""
+								noSelectionOption="true" />
+							<f:selectItems value="#{pleitoController.listaUnidadesNegocios}"
+								var="unidade" itemLabel="#{unidade.descricao}"
+								itemValue="#{unidade}" />
+						</h:selectOneMenu>
+
+						<h:outputLabel style="margin-right: 20px;"
+							value="#{bundle['pleito.label.acao']}" styleClass="label-button">
+							<h:outputText value="" styleClass="pesquisaDireta" />
+						</h:outputLabel>
+						<h:inputTextarea id="idDescricaoPleito" styleClass="inputtext"
+							rows="3" cols="105" onchange="limitarTextArea(this,500)"
+							onmouseout="limitarTextArea(this,500)"
+							onkeyup="limitarTextArea(this,500)"
+							value="#{pleitoController.pleitoMovimentacao.acao}"
+							required="true"
+							requiredMessage="#{pleitoController.getRequiredMessage('pleito.label.acao')}" />
+
+
+						<h:outputLabel style="margin-right: 20px;"
+							value="#{bundle['pleito.label.arquivo']}"
+							styleClass="label-button">
+							<h:outputText value="" styleClass="pesquisaDireta" />
+						</h:outputLabel>
+						 <p:fileUpload fileUploadListener="#{pleitoController.handleFileUpload}" mode="advanced"
+                     update="messages" sizeLimit="100000" allowTypes="/(\.|\/)(gif|jpe?g|png)$/" immediate="true"/>
+
+ <p:growl id="messages" showDetail="true" />
+
+
+						<p:commandLink title="#{bundle['geral.button.gravar.hint']}"
+							actionListener="#{pleitoController.salvarMovimentacao}"
+							styleClass="btnLaranja marginTop buttonSelected"
+							update=":#{p:component('movimentacoesForm')} :#{p:component('messagesMovimentacoes')} 
+							:#{p:component('focusMovimentacoes')} :#{p:component('dataTableCrudMovimentacao')} "
+							id="btnGravar" validateClient="true" onstart="showStatus();"
+							oncomplete="hideStatus();">
+							<span>#{bundle['geral.button.gravar']}</span>
+
+						</p:commandLink>
+					</h:panelGrid>
+					<h:panelGrid columns="1" id="modalPainelCad04">
+
+
+						<p:outputPanel id="pnlListaResultados"
+							style="width: 960px; height: 230px; overflow-y: scroll; overflow-x: hidden; ">
+
+							<p:dataTable value="#{pleitoController.listaMovimentacoes}"
+								var="movimentacao" widgetVar="movimentacoes"
+								id="dataTableCrudMovimentacao" rows="3"
+								emptyMessage="#{bundle['geral.crud.noItemFound']}"
+								paginator="true" sortFunction="#{pleitoController.sortByString}"
+								tableStyleClass="tablefixa"
+								rowStyleClass="#{empty rowIx or rowIx mod 2 ne 0 ? 'even-row' : 'odd-row'}"
+								rowIndexVar="rowIx" styleClass="estilo-border-dotted zebr"
+								paginatorPosition="bottom"
+								paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+								currentPageReportTemplate="#{bundle['geral.crud.exibindo']} {startRecord} #{bundle['geral.crud.ate']} {endRecord}  #{bundle['geral.crud.de']} {totalRecords}  #{bundle['geral.crud.registros']} "
+								rowsPerPageTemplate="3,5,10,50">
+
+								<p:column sortBy="#{movimentacao.dataCadastroFormatada}"
+									sortFunction="#{pleitoController.sortByString}"
+									filterStyle="display:none; visibility:hidden;"
+									filterBy="#{movimentacao.dataCadastroFormatada}}"
+									style="width:15%"
+									styleClass="gri-alfanumericos noBackGroundImage">
+									<h:outputText value="#{movimentacao.dataCadastroFormatada}" />
+									<f:facet name="header">
+										<h:outputText value="#{bundle['pleito.label.data']}" />
+									</f:facet>
+								</p:column>
+
+								<p:column sortBy="#{movimentacao.tipoStatus.descricao}"
+									sortFunction="#{pleitoController.sortByString}"
+									filterStyle="display:none; visibility:hidden;"
+									filterBy="#{movimentacao.tipoStatus.descricao}}"
+									style="width:15%"
+									styleClass="gri-alfanumericos noBackGroundImage">
+									<h:outputText value="#{movimentacao.tipoStatus.descricao}" />
+									<f:facet name="header">
+										<h:outputText value="#{bundle['pleito.label.status']}" />
+									</f:facet>
+								</p:column>
+
+								<p:column sortBy="#{movimentacao.acao}"
+									sortFunction="#{pleitoController.sortByString}"
+									filterStyle="display:none; visibility:hidden;"
+									filterBy="#{movimentacao.acao}}" style="width:15%"
+									styleClass="gri-alfanumericos noBackGroundImage">
+									<h:outputText value="#{movimentacao.acao}" />
+									<f:facet name="header">
+										<h:outputText value="#{bundle['pleito.label.acao']}" />
+									</f:facet>
+								</p:column>
+
+								<p:column sortBy="#{movimentacao.usuarioCadastro.nomeAbreviado}"
+									sortFunction="#{pleitoController.sortByString}"
+									filterStyle="display:none; visibility:hidden;"
+									filterBy="#{movimentacao.usuarioCadastro.nomeAbreviado}}"
+									style="width:20%"
+									styleClass="gri-alfanumericos noBackGroundImage">
+									<h:outputText
+										value="#{movimentacao.usuarioCadastro.nomeAbreviado}" />
+									<f:facet name="header">
+										<h:outputText value="#{bundle['pleito.label.usuario']}" />
+									</f:facet>
+								</p:column>
+
+								<p:column sortBy="#{movimentacao.unidadeNegocio.descricao}"
+									sortFunction="#{pleitoController.sortByString}"
+									filterStyle="display:none; visibility:hidden;"
+									filterBy="#{movimentacao.unidadeNegocio.descricao}}"
+									style="width:20%"
+									styleClass="gri-alfanumericos noBackGroundImage">
+									<h:outputText value="#{movimentacao.unidadeNegocio.descricao}" />
+									<f:facet name="header">
+										<h:outputText value="#{bundle['pleito.label.unidadeNegocio']}" />
+									</f:facet>
+								</p:column>
+
+								<p:column headerText="#{bundle['pleito.label.email']}"
+									styleClass="noBackGroundImage" style="width:7%"
+									exportable="false">
+
+									<p:graphicImage
+										value="/resources/imagens/#{movimentacao.iconeRetornoEnvio}"
+										rendered="#{movimentacao.isEmailEnviado()}"
+										alt="#{movimentacao.retornoEnvio}" style="cursor: pointer;"
+										id="envioEmail" />
+
+									<p:tooltip value="#{movimentacao.retornoEnvio}"
+										for="envioEmail" rendered="#{movimentacao.isEmailEnviado()}" />
+								</p:column>
+							</p:dataTable>
+						</p:outputPanel>
+					</h:panelGrid>
+				</fieldset>
+			</h:form>
+		</p:dialog>
+
+
+		<!-- CONFIRMA EXCLUSAO  -->
+		<p:dialog header="#{bundle['pleito.header.exclusao']}"
+			id="modalExcluirId" widgetVar="modalExcluir"
+			styleClass="ui-dialog-background ui-widget " modal="true"
+			dynamic="true" resizable="false" position="center" closable="false"
+			onShow="giveFocus('excluirForm:btnExcluir')">
+			<h:form id="excluirForm">
+				<span id="atencaoId" class="atencao2"
+					style="margin-top: -2px !important;" />
+
+				<h:outputFormat
+					style="margin-left: 40px; font-weight: bold !important;"
+					value="#{bundle['geral.crud.confirmExcluir']}">
+					<f:param value="#{bundle['pleito.consulta.tituloPagina']}" />
+				</h:outputFormat>
+				<br></br>
+				<p:commandLink id="btnExcluir"
+					styleClass="btnLaranja marginTop buttonSelected"
+					action="#{pleitoController.excluir}"
+					update=":#{p:component('messages')} :#{p:component('btnExportar')} :#{p:component('btnExportar')}"
+					oncomplete="PF('modalExcluir').hide();">
+					<span><h:outputText style="width: 1; height: 1;" title="Sim"
+							value="Sim" /></span>
+				</p:commandLink>
+				<p:commandLink id="btnNaoExcluir"
+					styleClass="btnAzul marginTop buttonSelected"
+					oncomplete="PF('modalExcluir').hide();"
+					update=":#{p:component('btnExportar')}">
+					<span><h:outputText style="width: 1; height: 1;" title="Não"
+							value="Não" /></span>
+				</p:commandLink>
+				<p:spacer height="30px" />
+			</h:form>
+		</p:dialog>
+	</ui:define>
+</ui:composition>

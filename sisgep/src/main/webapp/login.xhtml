@@ -1,0 +1,92 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+	<style type="text/css">
+.fontVerdadaNegrito {
+	font-size: 9px !important;
+	font-family: Verdana, Arial, Tahoma;
+	font-weight: bold;
+}
+
+.fontVerdada {
+	font-size: 9px !important;
+	font-family: Verdana, Arial, Tahoma;
+	font-weight: lighter;
+}
+</style>
+</h:head>
+
+<h:body>
+
+
+
+
+
+
+
+	<p:dialog id="dialog" header="Santa Casa da Bahia" widgetVar="dlg"
+		modal="true" closable="false" position="center" minWidth="380"
+		width="380" showEffect="slide" draggable="false" resizable="false"
+		visible="true">
+		<center>
+			<h:form>
+				<p:messages id="growl" life="30000" />
+				<br></br>
+				<center>
+					<p:graphicImage value="/resources/imagens/logoSISGEP.png"
+						width="260px" />
+				</center>
+				<br></br>
+
+				<h:outputLabel styleClass="fontVerdadaNegrito" value="Versão:" />
+				<h:outputLabel styleClass="fontVerdada" value="1.0.0" />
+
+
+				<h:panelGrid columns="2" cellpadding="5">
+					<h:outputLabel for="username" value="Usuário:" />
+					<p:inputText value="#{controleAcesso.matriculaUsuario}"
+						id="username" required="true" label="username"
+						style="width: 150px" />
+
+					<h:outputLabel for="password" value="Senha:" />
+					<h:inputSecret value="#{controleAcesso.senhaUsuario}" id="password"
+						required="true" label="password" style="width: 150px" />
+
+					<f:facet name="footer">
+						<center>
+							<br />
+							<p:commandButton id="btnEntrar" onclick="showStatus()"
+								oncomplete="hideStatus()" action="#{controleAcesso.autenticar}"
+								value="#{bundle['login.button.entrar']}"
+								title="#{bundle['login.toltip.button.entrar']}">
+								<f:ajax execute="@form" render="@form" />
+							</p:commandButton>
+
+
+						</center>
+					</f:facet>
+				</h:panelGrid>
+			</h:form>
+		</center>
+	</p:dialog>
+	<script type="text/javascript">
+		function handleLoginRequest(xhr, status, args) {
+			if (args.validationFailed || !args.loggedIn) {
+				jQuery('#dialog').effect("shake", {
+					times : 3
+				}, 100);
+			} else {
+				jQuery('#loginLink').fadeOut();
+				dlg.hide();
+			}
+		}
+	</script>
+
+</h:body>
+</html>

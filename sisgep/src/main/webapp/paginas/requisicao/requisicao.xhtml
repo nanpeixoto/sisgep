@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core">
+
+<h:head>
+	<h:outputStylesheet library="css" name="barra.css" />
+	<!-- <h:outputStylesheet library="bootstrap/css" name="bootstrap.css" /> -->
+	<h:outputStylesheet library="css" name="datatable.css" />
+	<h:outputStylesheet library="css" name="estilo.css" />
+	<h:outputStylesheet library="css" name="datepicker.css" />
+
+	<h:outputScript library="bootstrap/js" name="bootstrap.js" />
+	<h:outputScript library="js" name="prime-customizations.js" />
+	<h:outputScript library="js" name="jquery.price_format.1.3.js" />
+	<h:outputScript library="js" name="jquery.blockUI.js" />
+	<h:outputScript library="js" name="inputmask.js" />
+	<h:outputScript library="js" name="startup.js" />
+	<h:outputScript library="js" name="sired.js" />
+	<h:outputScript library="js" name="renderAjax.js" />
+	<title><h:outputLabel value="#{requisicaoController.documento.nome}" /></title>
+</h:head>
+<h:form id="cadastrarForm">
+	<p:focus id="focusCadastro" for="cadastrarForm" />
+	<p:messages id="messages" showDetail="false" />
+<!-- 	<fieldset class="filtro"> -->
+		<h:panelGrid columns="1" id="modalPainelCad01">
+			<h:outputLabel style="margin-right: 20px;" value="#{bundle['requisicao.label.unidadeGeradora']}" styleClass="label-button">
+				<h:outputText value="" styleClass="pesquisaDireta" />
+			</h:outputLabel>
+
+			<h:selectOneMenu id="selectUnidadeGeradoraID" title="#{bundle['requisicao.label.unidadeGeradora.hint']}"
+				style="margin-right: 20px; width: 400px;" converter="omnifaces.SelectItemsConverter"
+				value="#{requisicaoController.instance.unidade}" 
+				required="true"	requiredMessage="#{documentoController.getRequiredMessage('requisicao.label.unidadeGeradora')}">
+				<f:selectItem itemLabel="Selecione" noSelectionOption="true" />
+				<f:selectItems value="#{requisicaoController.listaUnidades}" var="unidade" itemValue="#{unidade}" itemLabel="#{unidade.nome}">
+				</f:selectItems>
+			</h:selectOneMenu>
+		</h:panelGrid>
+		
+		<p:dataGrid var="formulariosRequisicaoCampos" value="#{requisicaoController.formulario.listFormularioRequisicaoCampoVO}" columns="3"
+        	paginator="false" id="formulariosRequisicaoCampos" emptyMessage="#{bundle['geral.crud.noItemFound']}"
+       	 paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+       	 rowsPerPageTemplate="6,12,16">
+        	<h:outputLabel styleClass="label-button gri-alfanumericos" title="#{formulariosRequisicaoCampos.mensagem}" style="width: 225px">
+        		<h:outputLabel value="#{formulariosRequisicaoCampos.legenda != null? formulariosRequisicaoCampos.legenda :formulariosRequisicaoCampos.campo.descricao}"
+        			style="width: 100%"/><br/>
+        		<h:inputText  id="input_#{formulariosRequisicaoCampos.campo.id}"   maxlength="200" style="width: 100%"/>
+        	</h:outputLabel>
+		</p:dataGrid>
+<!-- 	</fieldset> -->
+
+
+
+	<h:outputLabel value="Formato"
+		styleClass="pesquisaDireta label-button" for="idFormato">
+		<br></br>
+		<h:selectOneMenu id="idFormato"
+			value="#{requisicaoController.formato}"
+			style="width: 180px;">
+			<f:selectItem itemLabel="Selecione" noSelectionOption="true" />
+			<f:selectItems
+				value="#{requisicaoController.formatoValues}" />
+			<p:ajax event="change" update="cadastrarForm"> </p:ajax>
+		</h:selectOneMenu>
+	</h:outputLabel>
+	
+	<h:outputLabel value="Tipo de Copia" rendered="#{requisicaoController.formato == 'COPIA'}"
+		styleClass="pesquisaDireta label-button" for="idFormato">
+		<br></br>
+		<h:selectOneMenu id="idTipoCopia"
+			value="#{requisicaoController.tipoCopia}"
+			style="width: 180px;">
+			<f:selectItem itemLabel="Selecione" noSelectionOption="true" />
+			<f:selectItems
+				value="#{requisicaoController.tipoCopiaValues}" />
+		</h:selectOneMenu>
+	</h:outputLabel>
+
+
+	<h:outputLabel value="Demanda" styleClass="pesquisaDireta label-button"
+		for="idDemanda">
+		<br></br>
+		<h:selectOneMenu id="idDemanda"
+			value="#{requisicaoController.demanda}" style="width: 180px;">
+			<f:selectItem itemLabel="Selecione" noSelectionOption="true" />
+			<f:selectItems value="#{requisicaoController.demandaValues}" />
+			<p:ajax event="change" update="cadastrarForm"> </p:ajax>
+		</h:selectOneMenu>
+	</h:outputLabel>
+
+	<h:outputLabel value="Número do Processo" rendered="#{requisicaoController.demanda == 'COPIA'} "
+		styleClass="pesquisaDireta label-button" for="idNumeroProcesso">
+		<br></br>
+		<p:inputText id="idNumeroProcesso" size="12" maxlength="12" style="width: 180px"
+			value="#{requisicaoController.terminalFinanceiro}"
+			onkeypress="return somenteNumero(event)" />
+	</h:outputLabel>
+	
+	<br></br><br></br><br></br>
+	
+	<h:outputText value="Observação"/>	
+	<h:inputTextarea value="Observação" style="width: 97%" />
+	
+	<br/>
+	
+	<h:outputText value="AVISO"/>	
+	<h:inputTextarea value="Aviso" style="width: 97%" />
+	
+		<p:commandLink id="idGravar" onclick=""
+			styleClass="btnAzul marginTopField"
+			onfocus="$(this).addClass('btnSelected');"
+			onblur="$(this).removeClass('btnSelected');">
+			<span><h:outputText title="Gravar" value="Gravar" /></span>
+		</p:commandLink>
+		<p:commandLink id="idLimpar" onclick=""
+			styleClass="btnLaranja marginTopField"
+			onfocus="$(this).addClass('btnSelected');"
+			onblur="$(this).removeClass('btnSelected');">
+			<span><h:outputText title="Limpar" value="Limpar" /></span>
+		</p:commandLink>
+		<p:commandLink id="idCancelar" onclick=""
+			styleClass="btnLaranja marginTopField"
+			onfocus="$(this).addClass('btnSelected');"
+			onblur="$(this).removeClass('btnSelected');">
+			<span><h:outputText title="Cancelar" value="Cancelar" /></span>
+		</p:commandLink>
+
+</h:form>
+</html>

@@ -1,0 +1,351 @@
+<ui:composition template="/WEB-INF/templates/template.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core">
+
+	<ui:define name="html-head">
+		<h:outputScript library="js" name="jquery.price_format.1.3.js" />
+		<script type="text/javascript">
+    /**
+     * Faces Validator
+     */
+    PrimeFaces.validator['custom.emailValidator'] = {
+ 
+        pattern: /\S+@\S+/,
+ 
+        validate: function(element, value) {
+            //use element.data() to access validation metadata, in this case there is none.
+            if(!this.pattern.test(value)) {
+                throw {
+                    summary: 'Validation Error',
+                    detail: value + ' is not a valid email.'
+                }
+            }
+        }
+    };
+ 
+    /**
+     * Bean validator
+     */
+    PrimeFaces.validator['Email'] = {
+ 
+        pattern: /\S+@\S+/,
+ 
+        MESSAGE_ID: 'org.primefaces.examples.validate.email.message',
+ 
+        validate: function(element, value) {
+            var vc = PrimeFaces.util.ValidationContext;
+ 
+            if(!this.pattern.test(value)) {
+                var msgStr = element.data('p-email-msg'),
+                msg = msgStr ? {summary:msgStr, detail: msgStr} : vc.getMessage(this.MESSAGE_ID);
+ 
+                throw msg;
+            }
+        }
+    };
+</script>
+
+	</ui:define>
+
+	<ui:define name="content-main-page">
+
+		<h:form id="formConsulta">
+			<p:focus id="focusConsulta" for="formConsulta" />
+			<p:messages id="messages" showDetail="false" />
+			<h3 class="titlePage">#{bundle['solicitante.consulta.cadastroSolicitante']}</h3>
+
+			<!-- BOTÔES -->
+			<h:panelGroup>
+
+				<p:commandLink
+					title="#{bundle['solicitante.label.novoSolicitante.hint']}"
+					styleClass="btnLaranja marginTop buttonSelected"
+					actionListener="#{solicitanteController.novo()}"
+					onclick=" jQuery('#modalCadastroId .ui-dialog-title').text('#{bundle['solicitante.label.novoSolicitante']}');"
+					oncomplete="PF('modalCadastro').show();"
+					update=":cadastrarForm :#{p:component('messages')}"
+					id="btnCadastro">
+					<span>#{bundle['solicitante.label.novoSolicitante']}</span>
+				</p:commandLink>
+
+				<p:commandLink styleClass="btnAzul marginTop buttonSelected"
+					onclick="PrimeFaces.monitorDownload(showStatus, hideStatus)"
+					title="#{bundle['geral.button.export.hint']}" ajax="false"
+					disabled="#{solicitanteController.listaFiltro.size()==0}"
+					id="btnExportar">
+					<span>#{bundle['geral.button.exportar']}</span>
+					<p:dataExporter type="xls" target="dataTableCrud"
+						fileName="#{bundle['solicitante.label.nome.relatorio']}"
+						postProcessor="#{solicitanteController.preExportar}" />
+				</p:commandLink>
+
+			</h:panelGroup>
+
+			<p:spacer height="30px" />
+
+			<!-- GRID DE CONSULTA -->
+			<p:outputPanel id="pnlListaResultados">
+
+				<p:dataTable value="#{solicitanteController.lista}"
+					var="solicitante" widgetVar="solicitantes" id="dataTableCrud"
+					rows="10" emptyMessage="#{bundle['geral.crud.noItemFound']}"
+					paginator="true"
+					filteredValue="#{solicitanteController.listaFiltro}"
+					sortFunction="#{solicitanteController.sortByString}"
+					tableStyleClass="tablefixa" sortBy="#{solicitante.nome}"
+					rowStyleClass="#{empty rowIx or rowIx mod 2 ne 0 ? 'even-row' : 'odd-row'}"
+					rowIndexVar="rowIx" styleClass="estilo-border-dotted zebr"
+					paginatorPosition="bottom"
+					paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+					currentPageReportTemplate="#{bundle['geral.crud.exibindo']} {startRecord} #{bundle['geral.crud.ate']} {endRecord}  #{bundle['geral.crud.de']} {totalRecords}  #{bundle['geral.crud.registros']} "
+					rowsPerPageTemplate="5,10,25,50">
+
+					<f:facet name="header">
+						<p:outputPanel style="text-align:right; margin-right:-10px"
+							styleClass="ui-widget-auxiliar">
+
+							<h:outputText value="#{bundle['geral.label.pesquisar']}"
+								escape="false" />
+
+							<p:inputText id="globalFilter"
+								onkeyup="PF('solicitantes').filter()" style="width:150px;"
+								maxlength="255" styleClass="letras-maiusculas semClear">
+								<p:ajax event="keyup" update=":#{p:component('btnExportar')}"
+									global="false" />
+							</p:inputText>
+						</p:outputPanel>
+					</f:facet>
+
+
+
+					<p:column sortBy="#{solicitante.nome}"
+						sortFunction="#{solicitanteController.sortByString}"
+						filterStyle="display:none; visibility:hidden;"
+						filterBy="#{solicitante.nome}" style="width:35%"
+						styleClass="gri-alfanumericos noBackGroundImage">
+						<h:outputText value="#{solicitante.nome}" />
+						<f:facet name="header">
+							<h:outputText value="#{bundle['solicitante.label.solicitante']}" />
+						</f:facet>
+					</p:column>
+
+					<p:column sortBy="#{solicitante.email}"
+						sortFunction="#{solicitanteController.sortByString}"
+						filterStyle="display:none; visibility:hidden;"
+						filterBy="#{solicitante.email}" style="width:25%"
+						styleClass="gri-alfanumericos noBackGroundImage">
+						<h:outputText value="#{solicitante.email}" />
+						<f:facet name="header">
+							<h:outputText value="#{bundle['solicitante.label.email']}" />
+						</f:facet>
+					</p:column>
+
+					<p:column sortBy="#{solicitante.telefone}"
+						sortFunction="#{solicitanteController.sortByString}"
+						filterStyle="display:none; visibility:hidden;"
+						filterBy="#{solicitante.telefone}" style="width:20%"
+						styleClass="gri-alfanumericos noBackGroundImage">
+						<h:outputText value="#{solicitante.telefone}" />
+						<f:facet name="header">
+							<h:outputText value="#{bundle['solicitante.label.telefone']}" />
+						</f:facet>
+					</p:column>
+
+					<p:column sortBy="#{solicitante.descricaoStatus}"
+						sortFunction="#{solicitanteController.sortByString}"
+						filterStyle="display:none; visibility:hidden;"
+						filterBy="#{solicitante.descricaoStatus}" style="width:10%"
+						styleClass="gri-alfanumericos noBackGroundImage">
+						<h:outputText value="#{solicitante.descricaoStatus}" />
+						<f:facet name="header">
+							<h:outputText value="#{bundle['solicitante.label.status']}" />
+						</f:facet>
+					</p:column>
+
+
+
+
+					<!--  COLUNAS QUE SÃO EXPOSTADAS PARA O RELATÓRIO MAS NÃO ESTAO VISIVEIS NA TABELA 
+						<p:column   sortFunction="#{solicitanteController.sortByString}" style=" display:none; visibility:hidden;"  styleClass="gri-alfanumericos noBackGroundImage" >
+							<h:outputText value="#{solicitante.situacaosolicitante.descricao}" />
+							<f:facet name="header">
+								<h:outputText value="#{bundle['solicitante.label.situacao']}"/>
+							</f:facet>
+						</p:column>
+					-->
+
+
+					<!-- AÇÕES -->
+
+					<p:column headerText="#{bundle['geral.label.acoes']}"
+						styleClass="noBackGroundImage" style="width:10%"
+						exportable="false">
+
+						<p:commandLink title="#{bundle['geral.button.alterar.hint']}"
+							actionListener="#{solicitanteController.edita(solicitante)}"
+							styleClass="editar buttonSelected"
+							onclick="jQuery('#modalCadastroId .ui-dialog-title').text('#{bundle['solicitante.consulta.tituloPagina']}');"
+							oncomplete="PF('modalCadastro').show();" update=":cadastrarForm">
+						</p:commandLink>
+						<p:commandLink id="btnExcluir"
+							onclick="PF('modalExcluir').show(); "
+							title="#{bundle['geral.button.excluir.hint']}"
+							style="margin-left: 30px; background-image: block !important;"
+							disabled="#{solicitanteController.perfilConsulta}"
+							styleClass="excluir buttonSelected">
+							<f:setPropertyActionListener
+								target="#{solicitanteController.instanceExcluir}"
+								value="#{solicitante}" />
+						</p:commandLink>
+					</p:column>
+				</p:dataTable>
+			</p:outputPanel>
+		</h:form>
+
+
+		<!-- DIALOG CADASTRAR solicitante -->
+		<p:dialog header="Cadastro/Alteração de solicitante"
+			id="modalCadastroId" widgetVar="modalCadastro"
+			styleClass="ui-dialog-background ui-widget" modal="true"
+			dynamic="true" closable="false" width="700px" resizable="false"
+			position="center" onShow="giveFocus('cadastrarForm')">
+			<p:ajax event="close" listener="#{solicitanteController.reset()}" />
+			<h:form id="cadastrarForm">
+				<p:focus id="focusCadastro" context="cadastrarForm" />
+				<p:messages id="messagesCadastro" escape="false" showDetail="false" />
+				<fieldset class="filtro">
+					<h:panelGrid columns="1" id="modalPainelCad01">
+
+						<h:outputLabel style="margin-right: 20px;"
+							value="#{bundle['solicitante.label.nome']}"
+							styleClass="label-button">
+							<h:outputText value="" styleClass="pesquisaDireta" />
+						</h:outputLabel>
+
+						<h:inputText value="#{solicitanteController.instance.nome}"
+							maxlength="50" size="70" id="textNome" required="true"
+							requiredMessage="#{solicitanteController.getRequiredMessage('solicitante.label.nome')}"
+							styleClass="letras-maiusculas" />
+
+						<h:panelGrid columns="2" id="modalPainelCad02">
+							<h:outputLabel style="margin-right: 20px;"
+								value="#{bundle['solicitante.label.email']}"
+								styleClass="label-button" />
+							<h:outputLabel value="#{bundle['solicitante.label.telefone']}"
+								styleClass="label-button">
+								<h:outputText value="" styleClass="pesquisaDireta" />
+							</h:outputLabel>
+
+							<p:inputText id="email1"
+								value="#{solicitanteController.instance.email}" maxlength="50"
+								size="30" styleClass="letras-maiusculas">
+								<f:validator validatorId="custom.emailValidator" />
+							</p:inputText>
+
+							<p:inputMask id="phone"
+								value="#{solicitanteController.instance.telefone}" size="30"
+								required="true"
+								requiredMessage="#{solicitanteController.getRequiredMessage('solicitante.label.telefone')}"
+								mask="(99) 9999-9999" />
+						</h:panelGrid>
+
+
+						<h:outputLabel value="#{bundle['solicitante.label.status']}" styleClass="label-button">
+							<h:outputText value="" styleClass="pesquisaDireta" />
+						</h:outputLabel>
+						<p:selectOneRadio id="ativo"
+							value="#{solicitanteController.instance.ativo}" required="true"
+							requiredMessage="#{solicitanteController.getRequiredMessage('solicitante.label.status')}">
+							<f:selectItem itemLabel="Ativo" itemValue="S" />
+							<f:selectItem itemLabel="Inativo" itemValue="N" />
+						</p:selectOneRadio>
+
+					</h:panelGrid>
+					<h:panelGrid columns="1" id="modalPainelCad03"
+						rendered="#{solicitanteController.faseEditar}">
+						<h:outputLabel style="margin-right: 20px;"
+							value="#{bundle['geral.label.usuarioCadastro']}"
+							styleClass="label-button">
+							<h:outputText value="#{solicitanteController.usuarioCadastro}" />
+						</h:outputLabel>
+					</h:panelGrid>
+					<h:panelGrid columns="1" id="modalPainelCad04"
+						rendered="#{solicitanteController.faseEditar}">
+						<h:outputLabel style="margin-right: 20px;"
+							value="#{bundle['geral.label.usuarioAlteracao']}"
+							styleClass="label-button">
+							<h:outputText value="#{solicitanteController.usuarioAlteracao}" />
+						</h:outputLabel>
+
+					</h:panelGrid>
+
+
+					<!-- GRAVAR CANCELAR -->
+					<h:panelGroup>
+
+						<p:commandLink title="#{bundle['geral.button.gravar.hint']}"
+							actionListener="#{solicitanteController.salvar}"
+							styleClass="btnLaranja marginTop buttonSelected"
+							update=":#{p:component('btnExportar')} :#{p:component('messagesCadastro')} 
+							:#{p:component('focusCadastro')} :#{p:component('btnExportar')} :#{p:component('dataTableCrud')} "
+							id="btnGravar" validateClient="true">
+							<span>#{bundle['geral.button.gravar']}</span>
+						</p:commandLink>
+
+
+						<p:commandLink title="#{bundle['geral.button.cancelar.hint']}"
+							styleClass="btnAzul marginTop buttonSelected"
+							onclick="PF('modalCadastro').hide();" process="@this"
+							update=":#{p:component('messages')}">
+							<p:resetInput target="@form" />
+							<span>#{bundle['geral.button.cancelar']}</span>
+						</p:commandLink>
+					</h:panelGroup>
+				</fieldset>
+			</h:form>
+		</p:dialog>
+
+
+		<!-- CONFIRMA EXCLUSAO  -->
+		<p:dialog header="#{bundle['solicitante.header.exclusao']}"
+			id="modalExcluirId" widgetVar="modalExcluir"
+			styleClass="ui-dialog-background ui-widget " modal="true"
+			dynamic="true" resizable="false" position="center" closable="false"
+			onShow="giveFocus('excluirForm:btnExcluir')">
+			<h:form id="excluirForm">
+				<span id="atencaoId" class="atencao2"
+					style="margin-top: -2px !important;" />
+
+				<h:outputFormat
+					style="margin-left: 40px; font-weight: bold !important;"
+					value="#{bundle['geral.crud.confirmExcluir']}">
+					<f:param value="#{bundle['solicitante.consulta.tituloPagina']}" />
+				</h:outputFormat>
+				<br></br>
+				<p:commandLink id="btnExcluir"
+					styleClass="btnLaranja marginTop buttonSelected"
+					action="#{solicitanteController.excluir}"
+					update=":#{p:component('messages')} :#{p:component('btnExportar')} :#{p:component('btnExportar')}"
+					oncomplete="PF('modalExcluir').hide();">
+					<span><h:outputText style="width: 1; height: 1;" title="Sim"
+							value="Sim" /></span>
+				</p:commandLink>
+				<p:commandLink id="btnNaoExcluir"
+					styleClass="btnAzul marginTop buttonSelected"
+					oncomplete="PF('modalExcluir').hide();"
+					update=":#{p:component('btnExportar')}">
+					<span><h:outputText style="width: 1; height: 1;" title="Não"
+							value="Não" /></span>
+				</p:commandLink>
+				<p:spacer height="30px" />
+			</h:form>
+		</p:dialog>
+
+
+
+	</ui:define>
+</ui:composition>

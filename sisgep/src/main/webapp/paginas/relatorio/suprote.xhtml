@@ -1,0 +1,243 @@
+<ui:composition template="/WEB-INF/templates/template.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core">
+
+	<ui:define name="html-head">
+		<h:outputScript library="js" name="jquery.price_format.1.3.js" />
+	</ui:define>
+
+	<ui:define name="breadcrumb">
+		<h:form id="formBreadcrumb">
+			<div id="wrapAuxiliar">
+				<ul class="breadcrumb-sistema">
+					<li>#{bundle['geral.breadcrumb.voce.esta.em']}</li>
+					<li><h:commandLink
+							value="#{bundle['geral.breadcrumb.requisicao']}"
+							styleClass="buttonSelected"
+							action="/home.xhtml?faces-redirect=true" /></li>
+					<li>#{bundle['relatorio.atendimento.tituloPagina']}</li>
+				</ul>
+			</div>
+		</h:form>
+	</ui:define>
+
+	<ui:define name="content-main-page">
+
+		<h:form id="formConsulta">
+			<p:focus id="focusConsulta" context="formConsulta" />
+			<p:messages id="messages" showDetail="false" />
+			<h3 class="titlePage">#{bundle['relatorio.atendimento.tituloPagina.descricao']}</h3>
+
+			<fieldset class="filtro">
+
+				<h:panelGrid
+					columns="#{relatorioAtendimentoController.perfilAcessoBase ? 3 : 2}"
+					id="modalPainelCad06">
+					<h:outputLabel style="margin-right: 14px !important;"
+						value="#{bundle['relatorio.atendimento.dataInicio']}"
+						styleClass="label-button">
+						<h:outputText value="" styleClass="pesquisaDireta" />
+					</h:outputLabel>
+					<h:outputLabel style="margin-right: 25px !important;"
+						value="#{bundle['relatorio.atendimento.dataFim']}"
+						styleClass="label-button">
+						<h:outputText value="" styleClass="pesquisaDireta" />
+					</h:outputLabel>
+					<h:outputLabel value="#{bundle['relatorio.atendimento.base']}"
+						styleClass="label-button"
+						rendered="#{relatorioAtendimentoController.perfilAcessoBase}" />
+
+				</h:panelGrid>
+
+				<h:panelGrid
+					columns="#{relatorioAtendimentoController.perfilAcessoBase ? 5 : 4}"
+					id="painelConsulta02">
+					<p:calendar id="idDataInicio" size="8" style="margin-right: 8px;"
+						value="#{relatorioAtendimentoController.relatorioAtendimento.dataInicio}"
+						pattern="dd/MM/yyyy" locale="pt_BR"
+						converter="converter.DataConverter" maxlength="10"
+						onkeyup="maskIt(this,event,'##/##/#####',false,false)"
+						required="true"
+						requiredMessage="#{empresaController.getRequiredMessage('relatorio.atendimento.dataInicio')}"
+						validator="validator.DataValidator"
+						validatorMessage="Campo #{bundle['relatorio.atendimento.dataInicio']} inválido.">
+					</p:calendar>
+
+
+					<p:calendar id="idDataFim" size="8" style="margin-right: 8px;"
+						value="#{relatorioAtendimentoController.relatorioAtendimento.dataFim}"
+						pattern="dd/MM/yyyy" locale="pt_BR"
+						converter="converter.DataConverter" maxlength="10"
+						onkeyup="maskIt(this,event,'##/##/#####',false,false)"
+						required="true"
+						requiredMessage="#{empresaController.getRequiredMessage('relatorio.atendimento.dataFim')}"
+						validator="validator.DataValidator"
+						validatorMessage="Campo #{bundle['relatorio.atendimento.dataFim']} inválido.">
+					</p:calendar>
+
+					<h:selectOneMenu id="selectBase"
+						style="margin-right:8px;  width: 280px"
+						value="#{relatorioAtendimentoController.relatorioAtendimento.base}"
+						converter="omnifaces.SelectItemsConverter"
+						rendered="#{relatorioAtendimentoController.perfilAcessoBase}">
+						<f:selectItem itemLabel="Selecione" noSelectionOption="true" />
+						<f:selectItems value="#{relatorioAtendimentoController.litaBases}"
+							var="base" itemValue="#{base}" itemLabel="#{base.nome}" />
+					</h:selectOneMenu>
+
+					<p:commandLink
+						title="#{bundle['geral.button.pesquisar.hint']}"
+						styleClass="btnLaranja marginTop buttonSelected"
+						style="margin-top:0px !important; margin-right: 8px;"
+						actionListener="#{relatorioAtendimentoController.localizar}"
+						id="btnLocalizar"
+						update="painielConsultaItens messages btnExportar">
+						<span>#{bundle['geral.button.consultar']}</span>
+					</p:commandLink>
+					
+					<p:commandLink styleClass="btnAzul marginTop buttonSelected"
+						onclick="PrimeFaces.monitorDownload(showStatus, hideStatus)"
+						title="#{bundle['geral.button.export.hint']}" ajax="false"
+						disabled="#{relatorioAtendimentoController.listaFiltro.size()==0}"
+						id="btnExportar" style="margin-top:0px !important; margin-right: 8px;">
+						<span>#{bundle['geral.button.exportar']}</span>
+						<p:dataExporter type="xls" target="dataTableCrud"
+							fileName="#{bundle['relatorio.atendimento.nome.relatorio']}"
+							postProcessor="#{relatorioAtendimentoController.preExportar}" />
+					</p:commandLink>
+					
+					
+				</h:panelGrid>
+			</fieldset>
+		
+
+		<h:panelGrid id="painielConsultaItens">
+			<h:panelGrid id="painielConsultaNoItens" rendered="#{relatorioAtendimentoController.pesquisaRealizada &amp;&amp; relatorioAtendimentoController.listaAtendimento.size() == 0}">
+				#{bundle['geral.message.erro.naoHaRegistros']}
+			</h:panelGrid>
+			
+			<h:panelGrid id="painielConsulta" rendered="#{relatorioAtendimentoController.pesquisaRealizada &amp;&amp; relatorioAtendimentoController.listaAtendimento.size() > 0}">
+				
+				<p:dataTable
+					value="#{relatorioAtendimentoController.listaAtendimento}"
+					var="atendimento" widgetVar="listaAtendimentos" id="dataTableCrud"
+					rows="10" emptyMessage="#{bundle['geral.crud.noItemFound']}"
+					rendered="#{relatorioAtendimentoController.listaAtendimento.size() > 0 }"
+					paginator="true"
+					filteredValue="#{relatorioAtendimentoController.listaFiltro}"
+					sortBy="requisicaoDocumento.requisicao.empresaContrato.base.nome"
+					sortFunction="#{relatorioAtendimentoController.sortByString}"
+					styleClass="estilo-border-dotted zebr" paginatorPosition="bottom"
+					tableStyleClass="tablefixa"
+					rowStyleClass="#{empty rowIx or rowIx mod 2 ne 0 ? 'even-row' : 'odd-row'}"
+					rowIndexVar="rowIx"
+					paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+					currentPageReportTemplate="#{bundle['geral.crud.exibindo']} {startRecord} #{bundle['geral.crud.ate']} {endRecord}  #{bundle['geral.crud.de']} {totalRecords}  #{bundle['geral.crud.registros']} "
+					rowsPerPageTemplate="5,10,25,50">
+
+					<f:facet name="header">
+						<p:outputPanel style="text-align:right; margin-right:-10px"
+							styleClass="ui-widget-auxiliar">
+							<h:outputText value="#{bundle['geral.label.pesquisar']}"
+								escape="false" />
+							<h:inputText id="globalFilter"
+								onkeyup="listaAtendimentos.filter();" style="width:150px;"
+								maxlength="255" styleClass="semClear">
+								<p:ajax event="keyup" update=":#{p:component('btnExportar')}"
+									global="false" />
+							</h:inputText>
+						</p:outputPanel>
+					</f:facet>
+
+					<p:column
+						filterBy="requisicaoDocumento.requisicao.empresaContrato.base.nome"
+						filterStyle="display:none; visibility:hidden;"
+						sortBy="requisicaoDocumento.requisicao.empresaContrato.base.nome"
+						sortFunction="#{relatorioAtendimentoController.sortByString}"
+						style="width:18%" styleClass="gri-alfanumericos noBackGroundImage">
+						<h:outputText
+							value="#{atendimento.requisicaoDocumento.requisicao.empresaContrato.base.nome}" />
+						<f:facet name="header">
+							<h:outputText value="#{bundle['relatorio.atendimento.base']}" />
+						</f:facet>
+					</p:column>
+
+					<p:column filterBy="dataHoraRegistroFormatado"
+						filterStyle="display:none; visibility:hidden;"
+						sortBy="dataHoraRegistroFormatado"
+						sortFunction="#{relatorioAtendimentoController.sortByString}"
+						style="width:14%" styleClass="gri-codigos noBackGroundImage">
+						<h:outputText value="#{atendimento.dataHoraRegistroFormatado}" />
+						<f:facet name="header">
+							<h:outputText
+								value="#{bundle['relatorio.atendimento.atendimento']}" />
+						</f:facet>
+					</p:column>
+
+					<p:column filterBy="requisicaoDocumento.requisicao.documento.nome"
+						filterStyle="display:none; visibility:hidden;"
+						sortBy="requisicaoDocumento.requisicao.documento.nome"
+						sortFunction="#{relatorioAtendimentoController.sortByString}"
+						style="width:20%" styleClass="gri-alfanumericos noBackGroundImage">
+						<h:outputText
+							value="#{atendimento.requisicaoDocumento.requisicao.documento.nome}" />
+						<f:facet name="header">
+							<h:outputText
+								value="#{bundle['relatorio.atendimento.documento']}" />
+						</f:facet>
+					</p:column>
+
+					<p:column filterBy="requisicaoDocumento.qtSolicitadaDocumento"
+						filterStyle="display:none; visibility:hidden;"
+						sortBy="requisicaoDocumento.qtSolicitadaDocumento"
+						sortFunction="#{relatorioAtendimentoController.sortByString}"
+						style="width:16%" styleClass="gri-numericos noBackGroundImage">
+						<h:outputText
+							value="#{atendimento.requisicaoDocumento.qtSolicitadaDocumento}" />
+						<f:facet name="header">
+							<h:outputText
+								value="#{bundle['relatorio.atendimento.qtdSolicitada']}" />
+						</f:facet>
+					</p:column>
+
+					<p:column filterBy="quantidade"
+						filterStyle="display:none; visibility:hidden;" sortBy="quantidade"
+						sortFunction="#{relatorioAtendimentoController.sortByString}"
+						style="width:16%" styleClass="gri-numericos noBackGroundImage">
+						<h:outputText value="#{atendimento.quantidade}" />
+						<f:facet name="header">
+							<h:outputText
+								value="#{bundle['relatorio.atendimento.qtdDisponivel']}" />
+						</f:facet>
+					</p:column>
+
+					<p:column filterBy="quantidadeNaoLocalizada"
+						filterStyle="display:none; visibility:hidden;"
+						sortBy="quantidadeNaoLocalizada"
+						sortFunction="#{relatorioAtendimentoController.sortByString}"
+						style="width:16%" styleClass="gri-numericos noBackGroundImage">
+						<h:outputText value="#{atendimento.quantidadeNaoLocalizada}" />
+						<f:facet name="header">
+							<h:outputText
+								value="#{bundle['relatorio.atendimento.qtdNaoLocalizada']}" />
+						</f:facet>
+					</p:column>
+
+
+
+
+				</p:dataTable>
+
+
+			</h:panelGrid>
+</h:panelGrid>
+		
+</h:form>
+
+	</ui:define>
+
+</ui:composition>
